@@ -1,0 +1,27 @@
+= Merry Menu
+
+TODO :
+* add options to url
+* add class and id options to menu (div)
+* possiblity to add a second level of tabs (render_second_menu)
+
+helper to create a tabbed menu
+
+in initializer/merry_menu
+  MerryMenu::Builder.configure do |config|
+    config.menu :admin do |m|
+      m.tab 'User', { :controller => "users" }
+      m.tab 'Articles', { :controller => "articles" }
+    end
+  end
+
+in view
+  <%= render_menu(:admin) %>
+  
+it renders
+  <div id="adminMenu">
+    <ul>
+      <li class="current"><a href="/users">Users</a></li>
+      <li><a href="/articles">Articles</a></li>
+    </ul>
+  </div>
