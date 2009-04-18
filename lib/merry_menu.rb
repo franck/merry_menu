@@ -1,31 +1,46 @@
 module MerryMenu
   module Helper
-    def render_menu(name)
-              
-      html = ""
-      menu_html = ""
+        
+    def render_menu(name, options = {})
       tabs_html = ""
+      menu_id_name = (options[:menu_id] || "menu").to_s
       
+      current_menu = false
+      
+      i = 0
       MerryMenu::Builder.menus[name].each do |tab|
-        tabs_html << render_tab(tab[:text], tab[:url])
+        position = (i == 0 ?  "first" : "")
+        i += 1
+        
+        tabs_html << render_tab(tab[:text], tab[:url], position)
+        if current_controller?(tab[:url][:controller])
+          current_menu = true
+        end
       end
             
-      render_div(tabs_html)
+      current_menu ? render_div(tabs_html, menu_id_name) : render_div("", menu_id_name)
     end
+    
     
     protected
   
-    def render_tab(text, url)
-      content_tag("li", link_to(t(text), url), :class => ("current" if current(url)))
+    def render_tab(text, url, position="")
+      
+      class_name = []
+      class_name << "current" if current_controller?(url[:controller])
+      class_name << position
+      
+      content_tag("li", link_to(t(text), url), :class => (class_name.join(" ") if class_name.size > 0))
     end
     
-    def render_div(tabs_html)
+    def render_div(tabs_html, menu_id_name)
       menu_html = content_tag("ul", tabs_html)
-      html = content_tag("div", menu_html, :id => "adminMenu" )
+      html = content_tag("div", menu_html, :id => menu_id_name )
     end
   
-    def current(url)
-      current = controller.params[:controller] == url
+    def current_controller?(ctrller)
+      pattern = ctrller.gsub(/^\//, "")
+      controller.params[:controller].include?(pattern)
     end 
   end
   
