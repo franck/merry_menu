@@ -2,26 +2,64 @@
 
 TODO :
 * add options to url
-* add class and id options to menu (div)
-* possiblity to add a second level of tabs (render_second_menu)
 
-helper to create a tabbed menu
+helper to create a tabbed menu. I18n compatible.
 
 in initializer/merry_menu
   MerryMenu::Builder.configure do |config|
-    config.menu :admin do |m|
-      m.tab 'User', { :controller => "users" }
-      m.tab 'Articles', { :controller => "articles" }
+    config.menu :admin_menu do |m|
+      m.tab 'admin.menu.users', { :controller => "/admin/users" }
+      m.tab 'admin.menu.cms', { :controller => "/admin/cms" }
+    end
+  end
+
+  MerryMenu::Builder.configure do |config|
+    config.menu :admin_submenu do |m|
+      m.tab 'admin.menu.articles', { :controller => "admin/cms/articles" }
+      m.tab 'admin.menu.categories', { :controller => "admin/cms/categories" }
     end
   end
 
 in view
-  <%= render_menu(:admin) %>
+  <%= render_menu(:admin_menu, :menu_id => "adminMenu") %>
+  <%= render_menu(:admin_menu, :menu_id => "adminSubMenu") %>
   
-it renders
+if current page is /admin/users, it renders :
   <div id="adminMenu">
     <ul>
       <li class="current"><a href="/users">Users</a></li>
       <li><a href="/articles">Articles</a></li>
     </ul>
   </div>
+  <div id="adminSubMenu"><ul></ul></div>
+
+if current page is /admin/cms/articles, it renders :
+  <div id="adminMenu">
+    <ul>
+      <li class="first"><a href="/admin">Users</a></li>
+      <li class="current "><a href="/admin/cms">Pages</a></li>
+    </ul>
+  </div>
+  <div id="adminSubMenu">
+    <ul><li class="current first"><a href="/admin/cms">Articles</a></li>
+    <li class=""><a href="/admin/cms/categories">Categories</a></li>
+    </ul>
+  </div>
+  
+merry_menu support Acl9 authorization plugin. just provide the roles for each tabs in the initializer :
+in initializer/merry_menu
+  MerryMenu::Builder.configure do |config|
+    config.menu :admin_menu do |m|
+      m.tab 'admin.menu.users', { :controller => "/admin/users" }, "admin"
+      m.tab 'admin.menu.cms', { :controller => "/admin/cms" }, "writer"
+    end
+  end
+
+  MerryMenu::Builder.configure do |config|
+    config.menu :admin_submenu do |m|
+      m.tab 'admin.menu.articles', { :controller => "admin/cms/articles" }
+      m.tab 'admin.menu.categories', { :controller => "admin/cms/categories" }
+    end
+  end
+  
+This code will render the user tab if the current_user.has_role? "admin" and it will render the cms tab if current_user.has_role? "writer".

@@ -12,7 +12,14 @@ module MerryMenu
         position = (i == 0 ?  "first" : "")
         i += 1
         
-        tabs_html << render_tab(tab[:text], tab[:url], position)
+        if tab[:roles].blank?
+          tabs_html << render_tab(tab[:text], tab[:url], position)
+        else
+          if controller.send(:current_user).has_role? tab[:roles]
+            tabs_html << render_tab(tab[:text], tab[:url], position)
+          end
+        end
+        
         if current_controller?(tab[:url][:controller])
           current_menu = true
         end
@@ -80,16 +87,17 @@ module MerryMenu
   end
   
   class Tab
-    attr_accessor :tabs, :text, :url
+    attr_accessor :tabs, :text, :url, :roles
     
     def initialize
       self.tabs = []
       self.text = text
       self.url = url
+      self.roles = roles
     end
     
-    def tab(text, url)
-      self.tabs << { :text => text, :url => url }
+    def tab(text, url, roles="")
+      self.tabs << { :text => text, :url => url, :roles => roles }
     end
      
     def build
