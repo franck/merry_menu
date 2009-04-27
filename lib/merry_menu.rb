@@ -16,7 +16,7 @@ module MerryMenu
           tabs_html << render_tab(tab[:text], tab[:url], position)
         else
           if controller.send(:current_user).has_role? tab[:roles]
-            tabs_html << render_tab(tab[:text], tab[:url], position)
+            tabs_html << render_tab(tab[:text], tab[:url], tab[:class_name], position)
           end
         end
         
@@ -31,9 +31,9 @@ module MerryMenu
     
     protected
   
-    def render_tab(text, url, position="")
+    def render_tab(text, url, initial_class_name="", position="")
       
-      class_name = []
+      class_name = [ initial_class_name ]
       class_name << "current" if current_controller?(url[:controller])
       class_name << position
       
@@ -42,7 +42,8 @@ module MerryMenu
     
     def render_div(tabs_html, menu_id_name)
       menu_html = content_tag("ul", tabs_html)
-      html = content_tag("div", menu_html, :id => menu_id_name )
+      menu_container = content_tag("div", menu_html, :id => "#{menu_id_name}-container")
+      html = content_tag("div", menu_container, :id => menu_id_name )
     end
   
     def current_controller?(ctrller)
@@ -87,17 +88,19 @@ module MerryMenu
   end
   
   class Tab
-    attr_accessor :tabs, :text, :url, :roles
+    attr_accessor :tabs, :text, :url, :roles, :class_name
     
     def initialize
       self.tabs = []
       self.text = text
       self.url = url
       self.roles = roles
+      self.class_name = class_name
     end
     
-    def tab(text, url, roles="")
-      self.tabs << { :text => text, :url => url, :roles => roles }
+    def tab(text, url, roles="", options={})
+      options[:class] ||= ""
+      self.tabs << { :text => text, :url => url, :roles => roles, :class_name => options[:class] }
     end
      
     def build
