@@ -15,7 +15,7 @@ module MerryMenu
         if tab[:roles].blank?
           tabs_html << render_tab(tab[:text], tab[:url], position)
         else
-          if controller.send(:current_user).has_role? tab[:roles]
+          if controller.send(:current_user).has_roles? tab[:roles]
             tabs_html << render_tab(tab[:text], tab[:url], tab[:class_name], position)
           end
         end
