@@ -10,13 +10,14 @@ module MerryMenu
       i = 0
       MerryMenu::Builder.menus[name].each do |tab|
         position = (i == 0 ?  "first" : "")
-        i += 1
         
         if tab[:roles].blank?
           tabs_html << render_tab(tab[:text], tab[:url], position)
+          i += 1
         else
           if controller.send(:current_user).has_roles? tab[:roles]
             tabs_html << render_tab(tab[:text], tab[:url], tab[:class_name], position)
+            i += 1
           end
         end
         
